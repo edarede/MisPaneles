@@ -1,0 +1,1264 @@
+<?php
+
+/**
+ * ARMAR EL MENU POR MEDIO DE JSON
+ */
+
+include_once("./includes/conecta.php");
+ 
+if ($_SESSION['id_admin']==""){
+	header("location:login.php");
+}
+$id_admin=$_SESSION['id_admin'];
+
+?>
+[{
+    text:'Editorial',
+    expanded: true,
+    children:[
+    
+    
+	{
+        text:'Acceso',
+        id:'carpeta_acceso',        
+		children:[
+	
+    
+<?
+
+
+$hay_uno_antes=false;
+$hay_uno_antes_sub=false;
+
+/**
+ * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO PERFILES
+ */     
+$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um
+		LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo
+		WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Perfiles' AND um.listado=1";
+$res=mysql_query($query,$link);	
+if (mysql_num_rows($res)>0){
+	
+		?>
+		{		
+			text:'Perfiles',
+			id:'perfiles',
+			leaf:true
+    	}		
+		<?
+		$hay_uno_antes=true;
+	} 
+
+
+
+
+
+
+
+/**
+ * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO USUARIOS
+ */     
+
+/*$query="SELECT um.*, m.modulo FROM sys_usuarios_modulos As um 
+		LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+		WHERE um.id_usuario='".$id_admin."' AND m.modulo='Usuarios' AND um.listado=1";*/
+$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um
+		LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo
+		WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Usuarios' AND um.listado=1";		
+
+$res=mysql_query($query,$link);
+
+if (mysql_num_rows($res)>0){
+	if ($hay_uno_antes){
+		?>
+		,
+		<?
+	}	
+	?>
+	{
+        text:'Usuarios',
+        id:'usuarios',
+        leaf:true
+    },
+    {
+        text:'Configuraciones',
+        id:'config',
+        leaf:true
+    }	
+    
+  ]}
+    
+	<?
+	$hay_uno_antes=true;
+}
+
+/**
+ * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO EDICIONES
+ */     
+
+/*$query="SELECT um.*, m.modulo FROM sys_usuarios_modulos As um 
+		LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+		WHERE um.id_usuario='".$id_admin."' AND m.modulo='Ediciones' AND um.listado=1"; */
+$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um
+		LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo
+		WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Ediciones' AND um.listado=1";			
+$res=mysql_query($query,$link);
+if (mysql_num_rows($res)>0){
+	if ($hay_uno_antes){
+		?>
+		,
+		<?
+	}
+	?>
+    {
+        text:'Ediciones',
+        id:'ediciones',
+        leaf:true
+    }	
+	<?	
+	$hay_uno_antes=true;
+}
+
+
+
+
+/**
+ * VERIFICAR PERMISOS DE LISTADO PARA EDITORES
+ */     
+
+$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+		LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+		WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Editores' AND um.listado=1";		
+$res=mysql_query($query,$link);
+if (mysql_num_rows($res)>0){
+	if ($hay_uno_antes){
+		?>
+		,
+		<?
+	}
+	?>
+	{
+        text:'Periodistas',
+        id:'editores',
+        leaf:true,
+        iconCls:  'editores'
+    }	
+	<?	
+	$hay_uno_antes=true;
+} 
+
+
+
+
+
+/**
+ * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO LECTORES
+ */     
+
+/*$query="SELECT um.*, m.modulo FROM sys_usuarios_modulos As um 
+		LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+		WHERE um.id_usuario='".$id_admin."' AND m.modulo='Lectores' AND um.listado=1"; */
+$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+		LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+		WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Lectores' AND um.listado=1";		
+$res=mysql_query($query,$link);
+if (mysql_num_rows($res)>0){
+	if ($hay_uno_antes){
+		?>
+		,
+		<?
+	}
+	?>
+	{
+        text:'Lectores',
+        id:'lectores',
+        leaf:true
+    }	
+	<?	
+	$hay_uno_antes=true;
+} 
+
+/**
+ * VERIFICAR PERMISOS DE LISTADO PARA LA CARPETA SECCIONES
+ */     
+
+$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+		LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+		WHERE um.id_perfil='".$_SESSION['id_perfil']."'
+		AND (m.modulo='Secciones' OR m.modulo='Tipo Secciones' OR m.modulo='SubSecciones') AND um.listado=1";
+$res=mysql_query($query,$link);
+if (mysql_num_rows($res)>0){
+	if ($hay_uno_antes){
+		?>
+		,
+		<?
+	}
+	?>
+	{
+        text:'Secciones',
+        id:'carpeta_secciones',
+        //leaf:true,
+		children:[
+	<?	
+	
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO SECCIONES
+	 */ 	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Secciones' AND um.listado=1";
+	$res=mysql_query($query,$link);	
+	if (mysql_num_rows($res)>0){
+		?>
+		{
+		
+			text:'Secciones',
+			id:'secciones',
+			leaf:true
+    	},		
+		<?
+	} 
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO TIPO DE SECCIONES
+	 */ 	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Tipo Secciones' AND um.listado=1";
+	$res=mysql_query($query,$link);	
+	if (mysql_num_rows($res)>0){
+		?>
+		{		
+			text:'Tipo Secciones',
+			id:'tipo_secciones',
+			leaf:true
+    	},				
+		<?
+	} 
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO SUBSECCIONES
+	 */ 	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='SubSecciones' AND um.listado=1";
+	$res=mysql_query($query,$link);	
+	if (mysql_num_rows($res)>0){
+		?>
+		{
+			text:'Sub Secciones',
+			id:'subsecciones',
+			leaf:true
+		}	
+		<?
+	}
+	?>
+		]
+    }	
+	<? 			
+} 
+
+
+
+
+
+/**
+ * VERIFICAR PERMISOS DE LISTADO PARA LA CARPETA PORTADA
+ */     
+
+$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+		LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+		WHERE um.id_perfil='".$_SESSION['id_perfil']."'
+		AND (m.modulo='Portada') AND um.listado=1";
+$res=mysql_query($query,$link);
+if (mysql_num_rows($res)>0){
+	if ($hay_uno_antes){
+		?>
+		,
+		<?
+	}
+	?>
+	{
+        text:'Portada',
+        id:'carpeta_portada',
+        //leaf:true,
+		children:[
+		
+	<?php	
+		/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO 
+	 */     
+	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Multimedios' AND um.listado=1";
+	$res=mysql_query($query,$link);
+	if (mysql_num_rows($res)>0){
+	    $hay_uno_antes_sub=true;		
+		?>
+		/*{
+	        text:'3 Notas principales',
+	        id:'multimedios_dosier2',
+	        iconCls:  'ordenar',
+	        leaf:true
+	    },
+	    */
+	    {
+	        text:'1 Nota Principal',
+	        id:'multimedios_dosier10',
+	        iconCls:  'ordenar',
+	        leaf:true
+	    }    
+		<?php	
+		$hay_uno_antes=true;
+	}
+	
+		
+		
+	
+	
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO PORTADA DIAGRAMAR
+	 */ 	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Portada' AND um.listado=1";
+	$res=mysql_query($query,$link);	
+	if (mysql_num_rows($res)>0){
+		//$hay_uno_antes_sub=true;
+		if ($hay_uno_antes_sub){
+		?>
+		,
+		<?php
+		}
+		$hay_uno_antes_sub=true;
+		?>
+		{
+		
+			text:'Diagramar Notas 1-2',
+			id:'diagramar',
+			iconCls:  'ordenar',
+			leaf:true
+    	}
+    	/*,
+        {
+		
+			text:'Diagramar Notas 3-4',
+			id:'diagramar2',
+			iconCls:  'ordenar',
+			leaf:true
+    	}*/		
+		<?php
+		$hay_uno_antes=true;
+	} 
+	
+	
+	
+	
+	
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO PORTADA ANALISIS
+	 	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Servicios' AND um.listado=1";
+	$res=mysql_query($query,$link);	
+	if (mysql_num_rows($res)>0){
+		if ($hay_uno_antes_sub){
+		?>
+		,
+		<?
+		}
+		$hay_uno_antes_sub=true;
+		?>
+		{
+		
+			text:'Servicios',
+			id:'servicios',
+			iconCls:  'servicios',
+			leaf:true
+    	}		
+		<?
+		$hay_uno_antes=true;
+	}
+	*/ 
+	
+	
+	
+	
+	
+	
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO PORTADA ANALISIS
+	  	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Portada' AND um.listado=1";
+	$res=mysql_query($query,$link);	
+	if (mysql_num_rows($res)>0){
+		if ($hay_uno_antes_sub){
+		?>
+		,
+		<?
+		}
+		$hay_uno_antes_sub=true;
+		?>
+		{
+		
+			text:'An&aacute;lisis y Opini&oacute;n',
+			id:'analisis',
+			iconCls:  'editores',
+			leaf:true
+    	}		
+		<?
+		$hay_uno_antes=true;
+	}
+	*/
+	
+	
+
+	
+	
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO PORTADA FAVORITOS
+	  	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Portada' AND um.listado=1";
+	$res=mysql_query($query,$link);	
+	if (mysql_num_rows($res)>0){
+		if ($hay_uno_antes_sub){
+		?>
+		,
+		<?
+		}
+		$hay_uno_antes_sub=true;
+		?>
+		{
+		
+			text:'Notas Favoritas',
+			id:'favoritos',
+			iconCls:  'favoritos',
+			leaf:true
+    	}		
+		<?
+		$hay_uno_antes=true;
+	}
+	
+	*/
+
+
+	
+	
+	
+	
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO MULTIMEDIOS
+	 */     
+	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Multimedios' AND um.listado=1";
+	$res=mysql_query($query,$link);
+	if (mysql_num_rows($res)>0){
+		if ($hay_uno_antes){
+			?>
+			,
+			<?
+		}
+		?>
+		{
+	        text:'Slider Deportes',
+	        id:'slider_notas1',
+	        iconCls:  'slider',
+	        leaf:true
+	    }    
+		<?
+		$hay_uno_antes=true;	
+	}
+	
+	
+	
+	
+	
+	
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO MULTIMEDIOS
+	 */     
+	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Multimedios' AND um.listado=1";
+	$res=mysql_query($query,$link);
+	if (mysql_num_rows($res)>0){
+		if ($hay_uno_antes){
+			?>
+			,
+			<?
+		}
+		?>
+		{
+	        text:'Slider Espect&aacute;aculos',
+	        id:'slider_notas2',
+	        iconCls:  'slider',
+	        leaf:true
+	    },
+	    {
+	        text:'Slider Autos',
+	        id:'slider_notas5',
+	        iconCls:  'slider',
+	        leaf:true
+	    },
+	    {
+	        text:'Slider Salud',
+	        id:'slider_notas6',
+	        iconCls:  'slider',
+	        leaf:true
+	    }       
+		<?
+		$hay_uno_antes=true;	
+	}
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO MULTIMEDIOS
+	      
+	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='MultimediosXXXXX' AND um.listado=1";
+	$res=mysql_query($query,$link);
+	if (mysql_num_rows($res)>0){
+		if ($hay_uno_antes){
+			?>
+			,
+			<?
+		}
+		?>
+		{
+	        text:'caja deportes x 3',
+	        id:'multimedios_zoom',
+	        iconCls:  'slider',
+	        leaf:true
+	    }    
+		<?	
+		$hay_uno_antes=true;
+	}
+	*/
+	
+	
+	
+	
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO MULTIMEDIOS
+	      
+	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='MultimediosXXXX' AND um.listado=1";
+	$res=mysql_query($query,$link);
+	if (mysql_num_rows($res)>0){
+		if ($hay_uno_antes){
+			?>
+			,
+			<?
+		}
+		?>
+		{
+	        text:'Caja Policiales x 3',
+	        id:'multimedios_tecnology',
+	        iconCls:  'slider',
+	        leaf:true
+	    }    
+		<?	
+		$hay_uno_antes=true;
+	}
+	*/
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO MULTIMEDIOS
+	    
+	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='MultimediosXXXX' AND um.listado=1";
+	$res=mysql_query($query,$link);
+	if (mysql_num_rows($res)>0){
+		if ($hay_uno_antes){
+			?>
+			,
+			<?
+		}
+		?>
+		{
+	        text:'Slider Marketing',
+	        id:'multimedios_marketing',
+	        iconCls:  'slider',
+	        leaf:true
+	    }    
+		<?	
+		$hay_uno_antes=true;
+	}  
+	*/
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO 
+	      
+	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Multimedios' AND um.listado=1";
+	$res=mysql_query($query,$link);
+	if (mysql_num_rows($res)>0){
+		if ($hay_uno_antes){
+			?>
+			,
+			<?
+		}
+		?>
+		{
+	        text:'Slider Separador',
+	        id:'multimedios_dosier',
+	        iconCls:  'slider_horizontal',
+	        leaf:true
+	    }    
+		<?	
+		$hay_uno_antes=true;
+	}
+	*/
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO 
+	      
+	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Multimedios' AND um.listado=1";
+	$res=mysql_query($query,$link);
+	if (mysql_num_rows($res)>0){
+		if ($hay_uno_antes){
+			?>
+			,
+			<?
+		}
+		?>
+		{
+	        text:'Nota Principal',
+	        id:'multimedios_dosier3',
+	        iconCls:  'nota',
+	        leaf:true
+	    }    
+		<?	
+		$hay_uno_antes=true;
+	}
+	*/
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO 
+	      
+	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Multimedios' AND um.listado=1";
+	$res=mysql_query($query,$link);
+	if (mysql_num_rows($res)>0){
+		if ($hay_uno_antes){
+			?>
+			,
+			<?
+		}
+		?>
+		{
+	        text:'&Uacute;ltimo momento',
+	        id:'nota_ult_momento',
+	        iconCls:  'add',
+	        leaf:true
+	    }    
+		<?	
+		$hay_uno_antes=true;
+	}	
+	*/
+	
+	
+	
+	
+	
+	
+	
+	
+	
+/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO 
+	      
+	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Multimedios' AND um.listado=1";
+	$res=mysql_query($query,$link);
+	if (mysql_num_rows($res)>0){
+		if ($hay_uno_antes){
+			?>
+			,
+			<?
+		}
+		?>
+		{
+	        text:'Agenda del d&iacute;a',
+	        id:'agenda_del_dia',
+	        iconCls:  'citasDia',
+	        leaf:true
+	    }    
+		<?	
+		$hay_uno_antes=true;
+	}	
+	*/
+	
+	
+	
+	
+		
+	
+	
+	
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO RUBROS
+	  	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Portada' AND um.listado=1";
+	$res=mysql_query($query,$link);	
+	if (mysql_num_rows($res)>0){
+		if ($hay_uno_antes_sub){
+		?>
+		,
+		<?
+		}
+		$hay_uno_antes_sub=true;
+		?>
+		{		
+			text:'Carrusel 1',
+			id:'carrusel1',
+			leaf:true
+    	}				
+		<?
+	} 
+  	
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO SUBRUBROS
+	 *  
+	 	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Portada' AND um.listado=1";
+	$res=mysql_query($query,$link);	
+	if (mysql_num_rows($res)>0){
+		if ($hay_uno_antes_sub){
+		?>
+		,
+		<?
+		}
+		$hay_uno_antes_sub=true;
+		?>
+		{
+			text:'Carrusel 2',
+			id:'carrusel2',
+			leaf:true
+		}	
+		<?
+	}
+	$hay_uno_antes_sub=false;
+  
+  
+ */  	
+	?>
+		]
+    }	
+	<? 			
+} 
+  
+  
+
+
+
+
+
+
+
+
+/**
+ * VERIFICAR PERMISOS DE LISTADO PARA LA CARPETA PORTADA
+ */     
+
+$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+		LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+		WHERE um.id_perfil='".$_SESSION['id_perfil']."'
+		AND (m.modulo='Multimedios') AND um.listado=1";
+$res=mysql_query($query,$link);
+if (mysql_num_rows($res)>0){
+	if ($hay_uno_antes){
+		?>
+		,
+		<?
+	}
+	?>
+	{
+        text:'Multimedios',
+        id:'carpeta_multimedios',        
+		children:[
+	<?	
+	
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO PORTADA DIAGRAMAR
+	 */ 	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Multimedios' AND um.listado=1";
+	$res=mysql_query($query,$link);	
+	if (mysql_num_rows($res)>0){
+		$hay_uno_antes_sub=true;
+		?>
+		{
+		
+			text:'Videos',
+			id:'videos2',
+			iconCls:  'videos2',
+			leaf:true
+    	}		
+		<?
+		$hay_uno_antes=true;
+	} 
+	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  	
+	  		/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO MULTIMEDIOS
+	 */     
+	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Multimedios' AND um.listado=1";
+	$res=mysql_query($query,$link);
+	if (mysql_num_rows($res)>0){
+		if ($hay_uno_antes){
+			?>
+			,
+			<?
+		}
+		?>
+		{
+	        text:'Galer&iacute;a de Imagenes',
+	        id:'multimedios',
+	        iconCls:  'ver_galeria',
+	        leaf:true
+	    }    
+		<?	
+	}
+	
+	
+	
+	
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO MULTIMEDIOS
+	 */     
+	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='MultimediosXXX' AND um.listado=1";
+	$res=mysql_query($query,$link);
+	if (mysql_num_rows($res)>0){
+		if ($hay_uno_antes){
+			?>
+			,
+			<?
+		}
+		?>
+		{
+	        text:'Galer&iacute;a Apenas Ayer',
+	        id:'multimedios_apenasayer',
+	        iconCls:  'ver_galeria',
+	        leaf:true
+	    }    
+		<?	
+		$hay_uno_antes=true;
+	}
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	
+	  	
+	  	
+	  	
+	?>
+		]
+    }	
+	<? 			
+} 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/**
+ * VERIFICAR PERMISOS DE LISTADO PARA LA CARPETA EMPRESAS
+ */     
+
+$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+		LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+		WHERE um.id_perfil='".$_SESSION['id_perfil']."'
+		AND (m.modulo='EmpresasXXX' OR m.modulo='RubrosXXX' OR m.modulo='SubRubrosXXX') AND um.listado=1";
+$res=mysql_query($query,$link);
+if (mysql_num_rows($res)>0){
+	if ($hay_uno_antes){
+		?>
+		,
+		<?
+	}
+	?>
+	{
+        text:'Empresas',
+        id:'carpeta_empresas',
+        //leaf:true,
+		children:[
+	<?	
+	
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO EMPRESAS
+	 */ 	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='EmpresasXXX' AND um.listado=1";
+	$res=mysql_query($query,$link);	
+	if (mysql_num_rows($res)>0){
+		$hay_uno_antes_sub=true;
+		?>
+		{
+		
+			text:'Empresas',
+			id:'empresas',
+			leaf:true
+    	}		
+		<?
+		$hay_uno_antes=true;
+	} 
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO RUBROS
+	 */ 	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='RubrosXXX' AND um.listado=1";
+	$res=mysql_query($query,$link);	
+	if (mysql_num_rows($res)>0){
+		if ($hay_uno_antes_sub){
+		?>
+		,
+		<?
+		}
+		$hay_uno_antes_sub=true;
+		?>
+		{		
+			text:'Rubros',
+			id:'rubros',
+			leaf:true
+    	}				
+		<?
+	} 
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO SUBRUBROS
+	 */ 	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='SubRubrosXXX' AND um.listado=1";
+	$res=mysql_query($query,$link);	
+	if (mysql_num_rows($res)>0){
+		if ($hay_uno_antes_sub){
+		?>
+		,
+		<?
+		}
+		$hay_uno_antes_sub=true;
+		?>
+		{
+			text:'Sub Rubros',
+			id:'subrubros',
+			leaf:true
+		}	
+		<?
+	}
+	$hay_uno_antes_sub=false;
+	?>
+		]
+    }	
+	<? 			
+} 
+
+
+
+
+
+
+
+
+
+/**
+ * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO COMENTARIOS
+ */     
+
+$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+		LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+		WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Comentarios' AND um.listado=1";
+$res=mysql_query($query,$link);
+if (mysql_num_rows($res)>0){
+	if ($hay_uno_antes){
+		?>
+		,
+		<?
+	}
+	?>
+	{
+        text:'Comentarios',
+        id:'comentarios',
+        leaf:true
+    }    
+	<?	
+} 
+
+
+
+/**
+ * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO CITAS DEL DIA
+ */     
+
+$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+		LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+		WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='CitasDia' AND um.listado=1";
+$res=mysql_query($query,$link);
+if (mysql_num_rows($res)>0){
+	if ($hay_uno_antes){
+		?>
+		,
+		<?
+	}
+	?>
+	{
+        text:'Juegos de Azar d&iacute;a',
+        id:'citasDia',
+        leaf:true,
+        iconCls:  'citasDia'
+    }    
+	<?
+	$hay_uno_antes=true;	
+}
+
+
+
+
+
+
+
+/**
+ * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO ATAJO NUEVA NOTA
+ */     
+
+$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+		LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+		WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='NuevaNota' AND um.listado=1";
+$res=mysql_query($query,$link);
+if (mysql_num_rows($res)>0){
+	if ($hay_uno_antes){
+		?>
+		,
+		<?
+	}
+	?>
+	{
+        text:'Nueva Nota',
+        id:'NuevaNota',
+        leaf:true,
+        iconCls:  'grilla_editar'
+    }    
+	<?	
+}
+
+
+
+
+
+
+
+
+
+
+/**
+ * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO COMENTARIOS EN FOTOS
+ */     
+
+$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+		LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+		WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Comentarios en Fotos' AND um.listado=1";
+$res=mysql_query($query,$link);
+if (mysql_num_rows($res)>0){
+	if ($hay_uno_antes){
+		?>
+		,
+		<?
+	}
+	?>
+	{
+        text:'Comentarios en Fotos',
+        id:'comentarios_fotos',
+        leaf:true
+    }    
+	<?	
+		$hay_uno_antes=true;
+}
+/**
+ * VERIFICAR PERMISOS DE LISTADO PARA LA CARPETA SOCIALES
+ */     
+
+$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+		LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+		WHERE um.id_perfil='".$_SESSION['id_perfil']."' 
+		AND m.modulo='Sociales' AND um.listado=1";
+$res=mysql_query($query,$link);
+if (mysql_num_rows($res)>0){
+	if ($hay_uno_antes){
+		?>
+		,
+		<?
+	}
+	?>
+	{
+        text:'Multimedios',
+        id:'carpeta_multimedios',
+        //leaf:true,
+		children:[
+	<?	
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO SOCIALES
+	 */ 	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Sociales' AND um.listado=1";
+	$res=mysql_query($query,$link);	
+	if (mysql_num_rows($res)>0){
+		?>
+		{
+		
+			text:'Fotos Sociales',
+			id:'sociales',
+			leaf:true
+    	},
+			
+		<?
+	} 	
+
+	/**
+	 * VERIFICAR PERMISOS DE LISTADO PARA EL MODULO FOTOS EXTRA
+	 */ 	
+	$query="SELECT um.*, m.modulo FROM sys_perfiles_modulos As um 
+			LEFT JOIN sys_modulos As m ON m.id_modulo=um.id_modulo 
+			WHERE um.id_perfil='".$_SESSION['id_perfil']."' AND m.modulo='Fotos Extras' AND um.listado=1";
+	$res=mysql_query($query,$link);	
+	if (mysql_num_rows($res)>0){
+		?>
+		{		
+			text:'Fotos Extras',
+			id:'fotos_extras',
+			leaf:true
+    	},		
+		<?
+	}
+	?>
+		]
+    }	    
+	<? 		 		
+}
+
+if (false){ // ESTA DESHABILITADO
+	?>
+	,{
+        text:'Citas del D&iacute;a',
+        id:'claves_del_dia',
+        leaf:true
+    }	
+	<?
+}
+?>
+	,{
+        text:'Salir',
+        id:'salir',
+        leaf:true,
+		iconCls:  'remove'
+    }
+	]
+}]
+
